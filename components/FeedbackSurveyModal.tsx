@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Event, EventFeedback } from '@/api/entities';
 
 interface FeedbackSurveyModalProps {
@@ -26,7 +27,7 @@ export default function FeedbackSurveyModal({ event, sessionId, onClose }: Feedb
         text: feedbackText,
       });
 
-      localStorage.setItem(`feedback_given_for_${event.id}`, 'true');
+      await AsyncStorage.setItem(`feedback_given_for_${event.id}`, 'true');
       Alert.alert('Thank you!', 'Your feedback has been submitted.');
       onClose();
     } catch (error) {
