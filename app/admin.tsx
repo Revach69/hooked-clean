@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { PlusCircle, Trash2, Pencil, Download } from 'lucide-react-native';
 import { Event } from '@/api/entities';
+import { EventData } from '@/types';
 import Toast from 'react-native-toast-message';
 import EventFormModal from '@/components/admin/EventFormModal';
 
 export default function AdminScreen() {
-  const [events, setEvents] = useState<any[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
 
   const fetchEvents = useCallback(async () => {
