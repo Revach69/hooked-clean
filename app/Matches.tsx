@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useNavigation } from 'expo-router';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, AppState } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { EventProfile, Like, Message } from '@/api/entities';
-import ChatModal from './ChatModal';
+import ChatModal from '@/components/ChatModal';
 
 const MatchesScreen = () => {
-  const navigation = useNavigation();
   const [matches, setMatches] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
@@ -76,9 +75,17 @@ const MatchesScreen = () => {
     setIsLoading(false);
   }, [currentSessionId, currentEventId, markMatchesAsNotified]);
 
-  useEffect(() => {
-    loadMatches();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadMatches();
+      const interval = setInterval(() => {
+        if (AppState.currentState === 'active') {
+          loadMatches();
+        }
+      }, 45000);
+      return () => clearInterval(interval);
+    }, [loadMatches])
+  );
 
   const renderItem = ({ item }: any) => (
     <TouchableOpacity style={styles.card} onPress={() => {

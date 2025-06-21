@@ -30,6 +30,24 @@ export default function JoinScreen() {
         }
 
         const foundEvent = events[0];
+        if (!foundEvent.starts_at || !foundEvent.expires_at) {
+          setError('This event is not configured correctly. Please contact the organizer.');
+          setIsLoading(false);
+          return;
+        }
+
+        const now = new Date().toISOString();
+        if (now < foundEvent.starts_at) {
+          setError("This event hasn't started yet. Try again soon!");
+          setIsLoading(false);
+          return;
+        }
+        if (now >= foundEvent.expires_at) {
+          setError('This event has ended.');
+          setIsLoading(false);
+          return;
+        }
+
         await AsyncStorage.setItem('currentEventId', foundEvent.id);
         await AsyncStorage.setItem('currentEventCode', foundEvent.code);
 
