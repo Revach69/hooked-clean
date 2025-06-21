@@ -10,7 +10,7 @@ import MatchNotificationToast from '@/components/MatchNotificationToast';
 import MessageNotificationToast from '@/components/MessageNotificationToast';
 import FeedbackSurveyModal from '@/components/FeedbackSurveyModal';
 
-export default function LayoutScreen() {
+export default function LayoutScreen({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [hasUnseenMatches, setHasUnseenMatches] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
@@ -83,7 +83,9 @@ export default function LayoutScreen() {
   useEffect(() => {
     checkNotifications();
     checkFeedbackEligibility();
-  }, []);
+    const interval = setInterval(checkNotifications, 45000);
+    return () => clearInterval(interval);
+  }, [checkNotifications, checkFeedbackEligibility]);
 
   const handleLogoPress = () => {
     router.push('/');
@@ -110,9 +112,7 @@ export default function LayoutScreen() {
       </View>
 
       {/* Body */}
-      <View style={styles.body}>
-        <Text style={styles.contentText}>Layout loaded for mobile 🚀</Text>
-      </View>
+      <View style={styles.body}>{children}</View>
 
       {/* Instagram */}
       <TouchableOpacity

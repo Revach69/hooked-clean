@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import EventCodeEntry from '../components/EventCodeEntry';
+import { Event } from '@/api/entities';
 
 
 export default function HomeScreen() {
@@ -41,15 +42,15 @@ export default function HomeScreen() {
     if (!eventId || !sessionId) return;
 
     try {
-      // Fake check: in production, replace with real fetch logic
-      const nowISO = new Date().toISOString();
-      const isActive = true; // Simulate the event being active
-
-      if (isActive) {
-        router.replace('/Discovery');
-        return;
+      const events = await Event.filter({ id: eventId });
+      if (events.length > 0) {
+        const evt = events[0];
+        const now = new Date().toISOString();
+        if (evt.starts_at && evt.expires_at && now >= evt.starts_at && now <= evt.expires_at) {
+          router.replace('/Discovery');
+          return;
+        }
       }
-
       await clearEventStorage();
     } catch (err) {
       await clearEventStorage();
