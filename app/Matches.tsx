@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, AppState } from 'react-native';
-import { useFocusEffect } from 'expo-router';
 import { EventProfile, Like, Message } from '@/api/entities';
 import ChatModal from '@/components/ChatModal';
 import { getCurrentEventId, getCurrentSessionId } from '@/utils/session';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, AppState, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const MatchesScreen = () => {
   const [matches, setMatches] = useState<any[]>([]);
@@ -106,7 +106,7 @@ const MatchesScreen = () => {
       setIsChatVisible(true);
     }}>
       <Image
-        source={item.profile_photo_url ? { uri: item.profile_photo_url } : require('@/assets/avatar-placeholder.png')}
+        source={{ uri: item.profile_photo_url }}
         style={styles.avatar}
       />
       <View style={styles.info}>
