@@ -85,7 +85,7 @@ export default function LayoutScreen() {
   }, []);
 
   const handleLogoPress = () => {
-    router.push('/home');
+    router.push('/');
   };
 
   return (

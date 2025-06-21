@@ -34,9 +34,9 @@ export default function ConsentScreen() {
   useEffect(() => {
     (async () => {
       const eventId = await AsyncStorage.getItem('currentEventId');
-      if (!eventId) return router.push('/home');
+      if (!eventId) return router.push('/');
       const events = await Event.filter({ id: eventId });
-      if (!events.length) return router.push('/home');
+      if (!events.length) return router.push('/');
       setCurrentEvent(events[0]);
 
       try {
