@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message';
 
 import { UploadFile } from '@/api/integrations';
 import { Event, EventProfile, User } from '../api/entities';
+import { EventData, EventProfileData, UserData } from '@/types';
 
 const COLORS = [
   "#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57",
@@ -18,11 +19,11 @@ const COLORS = [
 
 export default function ConsentScreen() {
   const router = useRouter();
-  const [currentEvent, setCurrentEvent] = useState<any>(null);
+  const [currentEvent, setCurrentEvent] = useState<EventData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
-  const [profilePhoto, setProfilePhoto] = useState<any>(null);
+  const [profilePhoto, setProfilePhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [formData, setFormData] = useState({
     first_name: '',
     age: '',

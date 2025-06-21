@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { Like, Event, EventProfile, Message } from '@/api/entities';
+import { EventData } from '@/types';
 import MatchNotificationToast from '@/components/MatchNotificationToast';
 import MessageNotificationToast from '@/components/MessageNotificationToast';
 import FeedbackSurveyModal from '@/components/FeedbackSurveyModal';
@@ -18,7 +19,7 @@ export default function LayoutScreen() {
   const [showMessageToast, setShowMessageToast] = useState(false);
   const [newMessageDetails, setNewMessageDetails] = useState({ name: '' });
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [feedbackEvent, setFeedbackEvent] = useState<any>(null);
+  const [feedbackEvent, setFeedbackEvent] = useState<EventData | null>(null);
   const [feedbackSessionId, setFeedbackSessionId] = useState<string | null>(null);
 
   const checkFeedbackEligibility = useCallback(async () => {

@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ✅ Add these imports for backend helpers
 import { User, EventProfile } from '@/api/entities';
+import { UserData, EventProfileData } from '@/types';
 import { UploadFile } from '@/api/integrations'; // ✅ Correct
 
 
@@ -30,8 +31,8 @@ const ALL_INTERESTS = [
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [eventProfile, setEventProfile] = useState<any>(null);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [eventProfile, setEventProfile] = useState<EventProfileData | null>(null);
   const [formData, setFormData] = useState({ bio: '', interests: [], height: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
