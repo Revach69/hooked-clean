@@ -2,6 +2,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
+import { EXPO_PROJECT_ID } from '@/constants/AppConfig';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -77,7 +78,7 @@ async function registerForPushNotificationsAsync(): Promise<Notifications.ExpoPu
     }
 
     token = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-expo-project-id-here',
+      projectId: EXPO_PROJECT_ID,
     });
 
     return token;
