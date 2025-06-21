@@ -6,70 +6,112 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  TextInput,
 } from 'react-native';
-import { PlusCircle, Trash2, Pencil, Download } from 'lucide-react-native';
-import { Event } from '@/api/entities';
+import { PlusCircle, Trash2, Pencil, Download, BarChart2, MessageSquare } from 'lucide-react-native';
+import { Event, EventProfile, Like, Message, EventFeedback } from '@/api/entities';
 import { EventData } from '@/types';
 import Toast from 'react-native-toast-message';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import EventFormModal from '@/components/admin/EventFormModal';
+import EventAnalyticsModal from '@/components/admin/EventAnalyticsModal';
+import FeedbackInsightsModal from '@/components/admin/FeedbackInsightsModal';
+import DeleteConfirmationDialog from '@/components/admin/DeleteConfirmationDialog';
+
+const ADMIN_PASSCODE = 'HOOKEDADMIN24';
 
 export default function AdminScreen() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
   const [events, setEvents] = useState<EventData[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
-  const [showFormModal, setShowFormModal] = useState(false);
+  const [modals, setModals] = useState({ form: false, analytics: false, feedbacks: false, delete: false });
 
   const fetchEvents = useCallback(async () => {
     try {
       const allEvents = await Event.all();
       setEvents(allEvents.sort((a, b) => (b.starts_at ?? '').localeCompare(a.starts_at ?? '')));
-    } catch (e) {
+    } catch {
       Toast.show({ type: 'error', text1: 'Failed to load events' });
     }
   }, []);
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    if (authenticated) fetchEvents();
+  }, [fetchEvents, authenticated]);
 
-  const handleDelete = async (id: string) => {
-    Alert.alert('Delete Event', 'Are you sure you want to delete this event?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await Event.delete(id);
-            Toast.show({ type: 'success', text1: 'Event deleted' });
-            fetchEvents();
-          } catch {
-            Toast.show({ type: 'error', text1: 'Failed to delete event' });
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleDownload = async (id: string) => {
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
     try {
-      await Event.download(id); // You might need to adjust this for mobile (see note below)
-      Toast.show({ type: 'success', text1: 'Event download started' });
-
+      await Event.delete(selectedEvent.id);
+      Toast.show({ type: 'success', text1: 'Event deleted' });
+      setModals({ form: false, analytics: false, feedbacks: false, delete: false });
+      fetchEvents();
     } catch {
-      Toast.show({ type: 'error', text1: 'Failed to download event' });
-
+      Toast.show({ type: 'error', text1: 'Failed to delete event' });
     }
   };
+
+  const handleDownload = async (event: EventData) => {
+    try {
+      const [profiles, likes, messages] = await Promise.all([
+        EventProfile.filter({ event_id: event.id }),
+        Like.filter({ event_id: event.id }),
+        Message.filter({ event_id: event.id }),
+      ]);
+      const data = { profiles, likes, messages };
+      const path = FileSystem.cacheDirectory + `${event.code}_export.json`;
+      await FileSystem.writeAsStringAsync(path, JSON.stringify(data, null, 2));
+      await Sharing.shareAsync(path);
+    } catch {
+      Toast.show({ type: 'error', text1: 'Failed to export event' });
+    }
+  };
+
+  const openModal = (name: keyof typeof modals, event?: EventData) => {
+    if (event) setSelectedEvent(event); else setSelectedEvent(null);
+    setModals((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const closeModals = () => {
+    setModals({ form: false, analytics: false, feedbacks: false, delete: false });
+    setSelectedEvent(null);
+  };
+
+  const handleAuthenticate = () => {
+    if (password === ADMIN_PASSCODE) {
+      setAuthenticated(true);
+      Toast.show({ type: 'success', text1: 'Authentication successful' });
+    } else {
+      Toast.show({ type: 'error', text1: 'Incorrect passcode' });
+    }
+  };
+
+  if (!authenticated) {
+    return (
+      <View style={styles.authContainer}>
+        <Text style={styles.title}>Admin Access</Text>
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Enter Passcode"
+          secureTextEntry
+          style={styles.input}
+        />
+        <TouchableOpacity onPress={handleAuthenticate} style={styles.authButton}>
+          <Text style={{ color: 'white' }}>Authenticate</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Dashboard</Text>
 
       <TouchableOpacity
-        onPress={() => {
-          setSelectedEvent(null);
-          setShowFormModal(true);
-        }}
+        onPress={() => openModal('form')}
         style={styles.createButton}
       >
         <PlusCircle size={18} color="#fff" />
@@ -85,46 +127,61 @@ export default function AdminScreen() {
             </View>
 
             <View style={styles.cardActions}>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedEvent(event);
-                  setShowFormModal(true);
-                }}
-                style={styles.actionButton}
-              >
+              <TouchableOpacity onPress={() => openModal('form', event)} style={styles.actionButton}>
                 <Pencil size={16} />
                 <Text style={styles.actionText}>Edit</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => handleDelete(event.id)}
-                style={styles.actionButton}
-              >
+              <TouchableOpacity onPress={() => openModal('delete', event)} style={styles.actionButton}>
                 <Trash2 size={16} color="red" />
                 <Text style={[styles.actionText, { color: 'red' }]}>Delete</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => handleDownload(event.id)}
-                style={styles.actionButton}
-              >
+              <TouchableOpacity onPress={() => handleDownload(event)} style={styles.actionButton}>
                 <Download size={16} />
                 <Text style={styles.actionText}>Download</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => openModal('analytics', event)} style={styles.actionButton}>
+                <BarChart2 size={16} />
+                <Text style={styles.actionText}>Analytics</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => openModal('feedbacks', event)} style={styles.actionButton}>
+                <MessageSquare size={16} />
+                <Text style={styles.actionText}>Feedbacks</Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
 
-      {showFormModal && (
+      {modals.form && (
         <EventFormModal
           event={selectedEvent}
-          isOpen={showFormModal}
-          onClose={() => setShowFormModal(false)}
+          isOpen={true}
+          onClose={closeModals}
           onSuccess={() => {
-            setShowFormModal(false);
+            closeModals();
             fetchEvents();
           }}
+        />
+      )}
+
+      {modals.analytics && selectedEvent && (
+        <EventAnalyticsModal event={selectedEvent} isOpen={true} onClose={closeModals} />
+      )}
+
+      {modals.feedbacks && selectedEvent && (
+        <FeedbackInsightsModal event={selectedEvent} isOpen={true} onClose={closeModals} />
+      )}
+
+      {modals.delete && selectedEvent && (
+        <DeleteConfirmationDialog
+          isVisible={true}
+          eventName={selectedEvent.name}
+          onConfirm={handleDeleteEvent}
+          onCancel={closeModals}
         />
       )}
     </View>
@@ -133,6 +190,9 @@ export default function AdminScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 40 },
+  authContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, width: '80%', marginVertical: 12 },
+  authButton: { backgroundColor: '#6366f1', padding: 12, borderRadius: 8 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   scroll: { marginTop: 10 },
   createButton: {
