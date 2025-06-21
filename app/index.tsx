@@ -4,11 +4,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import EventCodeEntry from '../components/EventCodeEntry';
 
 
 export default function HomeScreen() {
   const router = useRouter();
   const [activeModal, setActiveModal] = useState<null | 'qr' | 'manualCodeEntry'>(null);
+  const [enteredCode, setEnteredCode] = useState('');
 
   useEffect(() => {
     checkActiveEventSession();
@@ -80,7 +82,7 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Scan QR Code</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => handleEventAccess('demo123')}>
+      <TouchableOpacity style={styles.button} onPress={() => setActiveModal('manualCodeEntry')}>
         <Ionicons name="key-outline" size={24} color="#fff" />
         <Text style={styles.buttonText}>Enter Event Code</Text>
       </TouchableOpacity>
@@ -116,6 +118,22 @@ export default function HomeScreen() {
         }}
       >
         <Text style={{ color: '#fff' }}>Cancel</Text>
+      </TouchableOpacity>
+    </View>
+  </Modal>
+)}
+
+{activeModal === 'manualCodeEntry' && (
+  <Modal visible transparent animationType="slide" onRequestClose={closeModal}>
+    <View style={styles.modalContainer}>
+      <EventCodeEntry
+        onSubmit={(code) => {
+          setEnteredCode(code);
+          handleEventAccess(code);
+        }}
+      />
+      <TouchableOpacity onPress={closeModal} style={{ marginTop: 12 }}>
+        <Text style={styles.closeText}>Cancel</Text>
       </TouchableOpacity>
     </View>
   </Modal>
