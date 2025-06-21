@@ -1,0 +1,51 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
+type Props = {
+  matchName: string;
+  onDismiss: () => void;
+  onSeeMatches: () => void;
+};
+
+export default function MatchNotificationToast({ matchName, onDismiss, onSeeMatches }: Props) {
+  return (
+    <View style={styles.toast}>
+      <Text style={styles.title}>🎉 You matched with {matchName}!</Text>
+      <View style={styles.buttons}>
+        <TouchableOpacity onPress={onDismiss}>
+          <Text style={styles.link}>Dismiss</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onSeeMatches}>
+          <Text style={styles.link}>See Matches</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  toast: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    margin: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  title: {
+    fontWeight: '600',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 20,
+  },
+  link: {
+    color: '#6366f1',
+    fontWeight: '500',
+  },
+});
