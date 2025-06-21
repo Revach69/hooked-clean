@@ -9,7 +9,7 @@ app/           Mobile screens handled by expo-router
 components/    Reusable UI components and admin modals
 api/           Base44 SDK wrappers and helpers
 hooks/         Custom hooks (color scheme, theming)
-lib/, utils/   Shared utilities
+utils/         Shared utilities
 index.web.tsx  Entry for the web admin panel
 ```
 
