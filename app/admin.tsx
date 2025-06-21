@@ -8,7 +8,6 @@ import {
   Alert,
 } from 'react-native';
 import { PlusCircle, Trash2, Pencil, Download } from 'lucide-react-native';
-import { useLocalSearchParams } from 'expo-router';
 import { Event } from '@/api/entities';
 import Toast from 'react-native-toast-message';
 import EventFormModal from '@/components/admin/EventFormModal';
