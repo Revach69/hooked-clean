@@ -39,7 +39,7 @@ export default function DiscoveryScreen() {
     const sessionId = await AsyncStorage.getItem('currentSessionId');
     const eventId = await AsyncStorage.getItem('currentEventId');
     if (!sessionId || !eventId) {
-      router.replace('/home');
+      router.replace('/');
     } else {
       await loadMockProfiles();
     }
