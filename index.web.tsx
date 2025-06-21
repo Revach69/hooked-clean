@@ -1,10 +1,10 @@
 // index.web.tsx
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import AdminApp from './components/admin/AdminApp';
 
-const root = document.getElementById('root');
+const rootEl = document.getElementById('root');
 
-if (root) {
-  ReactDOM.render(<AdminApp />, root);
+if (rootEl) {
+  createRoot(rootEl).render(<AdminApp />);
 }
