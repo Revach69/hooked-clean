@@ -12,6 +12,7 @@ import {
   AppState,
 } from 'react-native';
 import { Message, ContactShare } from '@/api/entities';
+import { getCurrentEventId, getCurrentSessionId } from '@/utils/session';
 import ContactShareModal from './ContactShareModal';
 
 interface Props {
@@ -29,11 +30,23 @@ export default function ChatModal({ match, onClose }: Props) {
 
   const listRef = useRef<FlatList<any>>(null);
 
-  const sessionId = global.session_id;
-  const eventId = global.event_id;
-  const matchId = [sessionId, match.session_id].sort().join('_');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [eventId, setEventId] = useState<string | null>(null);
+  const matchId = sessionId ? [sessionId, match.session_id].sort().join('_') : '';
+
+  useEffect(() => {
+    (async () => {
+      const [sid, eid] = await Promise.all([
+        getCurrentSessionId(),
+        getCurrentEventId(),
+      ]);
+      setSessionId(sid);
+      setEventId(eid);
+    })();
+  }, []);
 
   const markAsRead = useCallback(async () => {
+    if (!sessionId || !eventId || !matchId) return;
     try {
       const unread = await Message.filter({
         match_id: matchId,
@@ -48,6 +61,7 @@ export default function ChatModal({ match, onClose }: Props) {
   }, [matchId, sessionId, eventId]);
 
   const loadMessages = useCallback(async () => {
+    if (!eventId || !matchId) return;
     try {
       const list = await Message.filter({ event_id: eventId, match_id: matchId }, 'created_date');
       setMessages(list);
@@ -59,6 +73,7 @@ export default function ChatModal({ match, onClose }: Props) {
   }, [eventId, matchId, markAsRead]);
 
   const loadContactShares = useCallback(async () => {
+    if (!eventId || !matchId || !sessionId) return;
     try {
       const mine = await ContactShare.filter({ event_id: eventId, match_id: matchId, sharer_session_id: sessionId });
       if (mine.length > 0) setHasSharedContact(true);
@@ -75,7 +90,7 @@ export default function ChatModal({ match, onClose }: Props) {
   }, [eventId, matchId, sessionId, match.session_id]);
 
   const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!sessionId || !eventId || !newMessage.trim()) return;
     const content = newMessage.trim();
     setNewMessage('');
     const temp = { id: `temp_${Date.now()}`, content, sender_session_id: sessionId, created_date: new Date().toISOString() };
@@ -116,6 +131,7 @@ export default function ChatModal({ match, onClose }: Props) {
   };
 
   useEffect(() => {
+    if (!sessionId || !eventId) return;
     loadMessages();
     loadContactShares();
     const interval = setInterval(() => {
@@ -125,7 +141,7 @@ export default function ChatModal({ match, onClose }: Props) {
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [loadMessages, loadContactShares]);
+  }, [loadMessages, loadContactShares, sessionId, eventId]);
 
   useEffect(() => {
     listRef.current?.scrollToEnd({ animated: true });

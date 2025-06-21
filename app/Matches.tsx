@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, AppState } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { EventProfile, Like, Message } from '@/api/entities';
 import ChatModal from '@/components/ChatModal';
+import { getCurrentEventId, getCurrentSessionId } from '@/utils/session';
 
 const MatchesScreen = () => {
   const [matches, setMatches] = useState<any[]>([]);
@@ -10,8 +11,19 @@ const MatchesScreen = () => {
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [isChatVisible, setIsChatVisible] = useState(false);
 
-  const currentSessionId = global.session_id;
-  const currentEventId = global.event_id;
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [sid, eid] = await Promise.all([
+        getCurrentSessionId(),
+        getCurrentEventId(),
+      ]);
+      setCurrentSessionId(sid);
+      setCurrentEventId(eid);
+    })();
+  }, []);
 
   const markMatchesAsNotified = useCallback(async (profiles: any[]) => {
     if (!currentSessionId || !currentEventId) return;
@@ -77,6 +89,7 @@ const MatchesScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
+      if (!currentSessionId || !currentEventId) return () => {};
       loadMatches();
       const interval = setInterval(() => {
         if (AppState.currentState === 'active') {
@@ -84,7 +97,7 @@ const MatchesScreen = () => {
         }
       }, 45000);
       return () => clearInterval(interval);
-    }, [loadMatches])
+    }, [loadMatches, currentSessionId, currentEventId])
   );
 
   const renderItem = ({ item }: any) => (
