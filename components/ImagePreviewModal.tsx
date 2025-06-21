@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Modal, View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { X } from 'lucide-react-native';
 
@@ -12,11 +12,8 @@ interface Props {
 }
 
 export default function ImagePreviewModal({ profile, onClose }: Props) {
-  useEffect(() => {
-    return () => {};
-  }, [onClose]);
-
   if (!profile) return null;
+
   const { profile_photo_url, profile_color, first_name } = profile;
   const initial = first_name?.[0]?.toUpperCase() || '?';
 
