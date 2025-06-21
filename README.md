@@ -1,20 +1,44 @@
-# Base44 App
+# Hooked Mobile & Admin App
 
+This repository contains a cross‑platform application built with **Expo**, **React Native** and **expo-router**. It communicates with the [Base44](https://base44.co) API and also includes a simple web admin panel.
 
-This app was created automatically by Base44.
-It's a Vite+React app that communicates with the Base44 API.
+## Project Structure
 
-## Running the app
-
-```bash
-npm install
-npm run dev
+```
+app/           Mobile screens handled by expo-router
+components/    Reusable UI components and admin modals
+api/           Base44 SDK wrappers and helpers
+hooks/         Custom hooks (color scheme, theming)
+lib/, utils/   Shared utilities
+index.web.tsx  Entry for the web admin panel
 ```
 
-## Building the app
+## Getting Started
 
-```bash
-npm run build
-```
+1. Install dependencies
 
-For more information and support, please contact Base44 support at app@base44.com.
+   ```bash
+   npm install
+   ```
+
+2. Start the Expo development server
+
+   ```bash
+   npm run start
+   ```
+
+3. Optional platform shortcuts
+
+   ```bash
+   npm run android   # run on Android device or emulator
+   npm run ios       # run on iOS device or simulator
+   npm run web       # run the admin panel in the browser
+   ```
+
+## Building
+
+Use the standard Expo build or EAS workflow for producing production binaries or a static web build.
+
+## Support
+
+For help with the Base44 SDK or the application templates please contact [app@base44.com](mailto:app@base44.com).
